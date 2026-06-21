@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkiKruDev · full‑stack & freelancing</title>
+  <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ----- RESET & BASE ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0b0f1a;
+      color: #eef2f6;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ----- ANIMATED BACKGROUND (canvas) ----- */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none; /* allows interaction with content */
+      background: radial-gradient(circle at 20% 30%, #162b3a, #0b0f1a 80%);
+    }
+
+    /* ----- LAYOUT & CONTAINER (above canvas) ----- */
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ----- HEADER / NAV ----- */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 0.8rem 0 2rem;
+      border-bottom: 1px solid rgba(64, 224, 208, 0.2);
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #40e0d0, #48b5e4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo i {
+      margin-right: 6px;
+      -webkit-text-fill-color: #40e0d0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      font-weight: 500;
+    }
+
+    .nav-links a {
+      color: #b6cdff;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: 0.2s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      background: #40e0d0;
+      transition: 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffffff;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .btn-outline {
+      border: 1.5px solid #40e0d0;
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+      color: #40e0d0 !important;
+      background: transparent;
+      transition: 0.3s;
+    }
+
+    .btn-outline:hover {
+      background: #40e0d0;
+      color: #0b0f1a !important;
+      border-color: #40e0d0;
+    }
+
+    /* ----- HERO SECTION ----- */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 2rem 0 3rem;
+      animation: fadeUp 1s ease-out;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(64, 224, 208, 0.12);
+      color: #7eddd6;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      width: fit-content;
+      border: 1px solid rgba(64, 224, 208, 0.2);
+      backdrop-filter: blur(4px);
+    }
+
+    .hero h1 {
+      font-size: 3.6rem;
+      font-weight: 700;
+      line-height: 1.2;
+      max-width: 900px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(145deg, #40e0d0, #6ab0e6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #b6cdff;
+      max-width: 700px;
+      margin: 0.5rem 0 0.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      margin-top: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #40e0d0, #2d9cdb);
+      border: none;
+      padding: 0.9rem 2.4rem;
+      border-radius: 60px;
+      font-weight: 600;
+      color: #0b0f1a;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 8px 24px rgba(64, 224, 208, 0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 32px rgba(64, 224, 208, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid #3b5998;
+      padding: 0.9rem 2.4rem;
+      border-radius: 60px;
+      font-weight: 500;
+      color: #eef2f6;
+      backdrop-filter: blur(4px);
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(64, 224, 208, 0.1);
+      border-color: #40e0d0;
+    }
+
+    /* ----- TRUST BADGES (stats) ----- */
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 2rem;
+      margin: 3rem 0 2rem;
+      padding: 2rem 0;
+      border-top: 1px solid rgba(64, 224, 208, 0.15);
+      border-bottom: 1px solid rgba(64, 224, 208, 0.15);
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .trust-item i {
+      font-size: 2rem;
+      color: #40e0d0;
+      width: 2.4rem;
+      text-align: center;
+    }
+
+    .trust-item div {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .trust-item .number {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .trust-item .label {
+      font-size: 0.85rem;
+      color: #8aa3d9;
+      letter-spacing: 0.3px;
+    }
+
+    /* ----- SERVICES / TECH GRID ----- */
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 600;
+      margin: 3rem 0 1.8rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-title i {
+      color: #40e0d0;
+      margin-right: 10px;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .tech-card {
+      background: rgba(22, 43, 58, 0.5);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(64, 224, 208, 0.15);
+      border-radius: 28px;
+      padding: 1.8rem 1rem;
+      text-align: center;
+      transition: 0.25s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .tech-card:hover {
+      transform: translateY(-6px);
+      border-color: #40e0d0;
+      box-shadow: 0 16px 32px rgba(64, 224, 208, 0.15);
+    }
+
+    .tech-card i {
+      font-size: 2.6rem;
+      color: #40e0d0;
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-card h4 {
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .tech-card p {
+      color: #9bb3e6;
+      font-size: 0.9rem;
+    }
+
+    /* ----- OWNER / BIO (from portfolio) ----- */
+    .owner-card {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2.5rem;
+      background: rgba(12, 22, 40, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 40px;
+      padding: 2.5rem 2.8rem;
+      margin: 2.5rem 0 3rem;
+      border: 1px solid rgba(64, 224, 208, 0.15);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    .owner-avatar {
+      font-size: 4.2rem;
+      background: linear-gradient(145deg, #1f3a4b, #0f1f2e);
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #40e0d0;
+      border: 2px solid #40e0d0;
+      box-shadow: 0 0 30px rgba(64, 224, 208, 0.2);
+    }
+
+    .owner-info h3 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .owner-info .title {
+      color: #7eddd6;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .owner-info .bio {
+      color: #b6cdff;
+      max-width: 550px;
+    }
+
+    .owner-info .badge-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+
+    .badge-group span {
+      background: rgba(64, 224, 208, 0.08);
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(64, 224, 208, 0.2);
+    }
+
+    /* ----- FOOTER / CONTACT ----- */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(64, 224, 208, 0.1);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .social-links a {
+      color: #b0caf5;
+      font-size: 1.5rem;
+      margin-right: 1.2rem;
+      transition: 0.2s;
+    }
+
+    .social-links a:hover {
+      color: #40e0d0;
+      transform: scale(1.1);
+    }
+
+    .footer small {
+      color: #6a84b0;
+    }
+
+    /* ----- ANIMATIONS ----- */
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* responsive */
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 2.4rem; }
+      .navbar { flex-direction: column; gap: 1rem; align-items: start; }
+      .nav-links { flex-wrap: wrap; gap: 1.2rem; }
+      .owner-card { flex-direction: column; text-align: center; padding: 2rem 1.5rem; }
+      .trust-strip { flex-direction: column; align-items: start; gap: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Canvas for animated background (particles) -->
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="container">
+    <!-- NAV -->
+    <nav class="navbar">
+      <div class="logo"><i class="fas fa-cubes"></i> SkiKru<span style="font-weight:300;">Dev</span></div>
+      <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Stack</a>
+        <a href="#">Work</a>
+        <a href="#" class="btn-outline"><i class="fas fa-rocket"></i> Hire us</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <span class="hero-badge"><i class="fas fa-bolt" style="margin-right:6px;"></i> freelance · full‑stack · spring boot</span>
+      <h1>Build <span>trustworthy</span> software <br> with speed & precision.</h1>
+      <p>Java · Spring Boot · React · JavaScript · HTML/CSS – from concept to deployment, by SkiKruDev.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="window.open('https://umalavanya.github.io/uma-portfolio-1/','_blank')"><i class="fas fa-paper-plane"></i> Explore portfolio</button>
+        <button class="btn-secondary"><i class="fas fa-phone-alt"></i> Free consultation</button>
+      </div>
+    </section>
+
+    <!-- TRUST STRIP (security, growth, etc) -->
+    <div class="trust-strip">
+      <div class="trust-item"><i class="fas fa-shield-alt"></i><div><span class="number">100%</span><span class="label">secure · reliable</span></div></div>
+      <div class="trust-item"><i class="fas fa-chart-line"></i><div><span class="number">5+ yrs</span><span class="label">growth & scaling</span></div></div>
+      <div class="trust-item"><i class="fas fa-clock"></i><div><span class="number">2x</span><span class="label">faster delivery</span></div></div>
+      <div class="trust-item"><i class="fas fa-star"></i><div><span class="number">4.9/5</span><span class="label">client satisfaction</span></div></div>
+    </div>
+
+    <!-- TECH STACK (services) -->
+    <h2 class="section-title"><i class="fas fa-code"></i> Tech stack · expertise</h2>
+    <div class="tech-grid">
+      <div class="tech-card"><i class="fab fa-java"></i><h4>Java & Spring</h4><p>Spring Boot, REST, Microservices</p></div>
+      <div class="tech-card"><i class="fab fa-react"></i><h4>React + JS</h4><p>Frontend, hooks, state management</p></div>
+      <div class="tech-card"><i class="fab fa-js"></i><h4>JavaScript</h4><p>ES6+, async, DOM</p></div>
+      <div class="tech-card"><i class="fab fa-html5"></i><h4>HTML & CSS</h4><p>Responsive, animations, flex/grid</p></div>
+      <div class="tech-card"><i class="fas fa-database"></i><h4>SQL · MongoDB</h4><p>Relational & NoSQL</p></div>
+      <div class="tech-card"><i class="fas fa-cloud"></i><h4>DevOps</h4><p>Git, Maven, AWS fundamentals</p></div>
+    </div>
+
+    <!-- OWNER CARD (Uma Lavanya) -->
+    <div class="owner-card">
+      <div class="owner-avatar"><i class="fas fa-user-astronaut"></i></div>
+      <div class="owner-info">
+        <h3>Uma Lavanya Chintapanti</h3>
+        <div class="title"><i class="fas fa-graduation-cap"></i> Ph.D. Theoretical Physics · Full Stack Dev</div>
+        <p class="bio">Combining analytical thinking with software engineering. Founder of SkiKruDev, gold medalist, and postdoctoral researcher at IISc. I build secure, high‑performance applications for startups and enterprises.</p>
+        <div class="badge-group">
+          <span><i class="fas fa-check-circle" style="color:#40e0d0;"></i> Spring Boot</span>
+          <span><i class="fas fa-check-circle" style="color:#40e0d0;"></i> React</span>
+          <span><i class="fas fa-check-circle" style="color:#40e0d0;"></i> Freelance</span>
+          <span><i class="fas fa-check-circle" style="color:#40e0d0;"></i> JWT · Security</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="social-links">
+        <a href="https://umalavanya.github.io/uma-portfolio-1/" target="_blank" aria-label="Portfolio"><i class="fas fa-globe"></i></a>
+        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+      </div>
+      <small><i class="fas fa-lock" style="margin-right:6px;color:#40e0d0;"></i> © 2026 SkiKruDev · built with <i class="fas fa-heart" style="color:#40e0d0;"></i> & spring boot</small>
+    </footer>
+  </div>
+
+  <!-- JavaScript for Particle Background Animation -->
+  <script>
+    (function() {
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+      const PARTICLE_COUNT = 140;
+
+      // Resize canvas
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Particle class
+      class Particle {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.size = Math.random() * 3.2 + 1.2;
+          this.speedX = (Math.random() - 0.5) * 0.8;
+          this.speedY = (Math.random() - 0.5) * 0.8;
+          this.opacity = Math.random() * 0.5 + 0.3;
+        }
+
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+
+          // wrap around edges
+          if (this.x < 0) this.x = width;
+          if (this.x > width) this.x = 0;
+          if (this.y < 0) this.y = height;
+          if (this.y > height) this.y = 0;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          // gradient color: trust / tech palette (cyan + blue)
+          const gradient = ctx.createRadialGradient(this.x-2, this.y-2, 1, this.x, this.y, this.size*2);
+          gradient.addColorStop(0, `rgba(64, 224, 208, ${this.opacity})`);
+          gradient.addColorStop(1, `rgba(72, 181, 228, ${this.opacity * 0.4})`);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        }
+      }
+
+      // init particles
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push(new Particle());
+        }
+      }
+      initParticles();
+
+      // draw connections (lines between nearby particles)
+      function drawConnections() {
+        const maxDist = 140;
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < maxDist) {
+              const opacity = 0.25 * (1 - dist / maxDist);
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(64, 224, 208, ${opacity})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // animation loop
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        // subtle background glow (center)
+        const radGrad = ctx.createRadialGradient(width/2, height/2, 30, width/2, height/2, 600);
+        radGrad.addColorStop(0, 'rgba(40, 180, 200, 0.04)');
+        radGrad.addColorStop(1, 'rgba(10, 20, 40, 0.0)');
+        ctx.fillStyle = radGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // update & draw
+        for (let p of particles) {
+          p.update();
+          p.draw();
+        }
+        drawConnections();
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      // re-init particles on window resize (avoid clustering)
+      window.addEventListener('resize', () => {
+        resize();
+        initParticles();
+      });
+
+    })();
+  </script>
+
+</body>
+</html>
